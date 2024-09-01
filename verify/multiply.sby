@@ -1,0 +1,16 @@
+[options]
+mode prove
+expect timeout
+timeout 180
+
+[engines]
+smtbmc boolector
+
+[script]
+read -define SIM
+read -formal multiply.v latch_reg.v
+prep -top approx_mul
+
+[files]
+../src/multiply.v
+../src/latch_reg.v

@@ -1,0 +1,12 @@
+[options]
+mode prove
+
+[engines]
+smtbmc boolector
+
+[script]
+read -formal square.v
+prep -top approx_square
+
+[files]
+../src/square.v
