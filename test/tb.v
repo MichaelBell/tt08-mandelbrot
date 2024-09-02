@@ -5,13 +5,6 @@
 */
 module tb ();
 
-  // Dump the signals to a VCD file. You can view it with gtkwave.
-  initial begin
-    $dumpfile("tb.vcd");
-    $dumpvars(0, tb);
-    #1;
-  end
-
   reg signed [1:-12] value_in;
   reg input_x;
   reg input_en;
@@ -26,8 +19,12 @@ module tb ();
   wire [7:0] uio_out;
   wire [7:0] uio_oe;
 
-  wire escaped = uo_out[7];
-  wire [6:0] iter = uo_out[6:0];
+  wire hsync;
+  wire vsync;
+  wire [5:0] rgb;
+  wire [1:0] red;
+  wire [1:0] green;
+  wire [1:0] blue;
 
 `ifdef GL_TEST
   wire vpwr = 1'b1 ? 1'b1 : 1'bz;
@@ -53,4 +50,11 @@ module tb ();
       .rst_n  (rst_n)     // not reset
   );
 
+  assign hsync = uo_out[7];
+  assign vsync = uo_out[3];
+  assign rgb = {uo_out[0], uo_out[4], uo_out[1], uo_out[5], uo_out[2], uo_out[6]};
+  assign red = rgb[5:4];
+  assign green = rgb[3:2];
+  assign blue = rgb[1:0];
+  
 endmodule

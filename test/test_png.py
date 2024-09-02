@@ -7,74 +7,27 @@
 import cocotb
 from cocotb.clock import Clock
 from cocotb.triggers import ClockCycles
-from driver import MandelbrotDriver
 from mandelbrot import mandelbrot_calc
 from PIL import Image
 
 
-IMAGE_WIDTH = 106
-IMAGE_HEIGHT = 80
+IMAGE_WIDTH = 91
+IMAGE_REP = 7
+IMAGE_HEIGHT = 480
 
 # How many iterations to run
-MAX_ITER = 15
+MAX_ITER = 14
 
 # Define the plotting range
-X_RANGE = (-2.0, 1.5)
-Y_RANGE = (-1.5, 1.5)
-
-
-@cocotb.test()
-async def test_mandelbrot_png(dut):
-    dut._log.info("Start")
-
-    # Set the clock period to 50 ns (20 MHz)
-    clock = Clock(dut.clk, 50, units="ns")
-    cocotb.start_soon(clock.start())
-
-    # Reset
-    dut._log.info("Reset")
-    dut.ena.value = 1
-    dut.ui_in.value = 0
-    dut.uio_in.value = 0
-    dut.rst_n.value = 0
-    await ClockCycles(dut.clk, 10)
-    dut.rst_n.value = 1
-
-    dut._log.info("Test mandelbrot set")
-
-    mandelbrot = MandelbrotDriver(dut)
-
-    # Create a new image with RGB mode
-    image = Image.new("RGB", (IMAGE_WIDTH, IMAGE_HEIGHT))
-
-    xmin, xmax = X_RANGE
-    ymin, ymax = Y_RANGE
-
-    # Loop through each pixel
-    for py in range(IMAGE_HEIGHT):
-        dut._log.info(f"Row {py} of {IMAGE_HEIGHT}")
-        for px in range(IMAGE_WIDTH):
-            # Convert pixel coordinate to complex number
-            x = xmin + (xmax - xmin) * px / (IMAGE_WIDTH - 1)
-            y = ymin + (ymax - ymin) * py / (IMAGE_HEIGHT - 1)
-
-            # Compute the number of iterations
-            m = await mandelbrot.run(complex(x, y), MAX_ITER)
-
-            # Color mapping
-            color = 255 - int(m * 255 / MAX_ITER)
-            image.putpixel((px, py), (color, color, color))
-        image.save("mandelbrot.png")
-
-    ## Save the image
-    image.save("mandelbrot.png")
+X_RANGE = (-2.0, 0.8)
+Y_RANGE = (-1.2, 1.2)
 
 
 @cocotb.test()
 async def test_mandelbrot_py_png(dut):
     dut._log.info("Start")
 
-    image = Image.new("RGB", (IMAGE_WIDTH, IMAGE_HEIGHT))
+    image = Image.new("RGB", (IMAGE_WIDTH*IMAGE_REP, IMAGE_HEIGHT))
     xmin, xmax = X_RANGE
     ymin, ymax = Y_RANGE
 
@@ -89,8 +42,25 @@ async def test_mandelbrot_py_png(dut):
             m = mandelbrot_calc(complex(x, y), MAX_ITER)
 
             # Color mapping
-            color = 255 - int(m * 255 / MAX_ITER)
-            image.putpixel((px, py), (color, color, color))
+            palette = [(0xA0, 0,    0xF0),
+                       (0xF0, 0,    0xA0),
+                       (0xF0, 0,    0x50),
+                       (0xF0, 0, 0),
+                       (0xF0, 0x50, 0),
+                       (0xF0, 0xA0, 0),
+                       (0xA0, 0xF0, 0),
+                       (0x50, 0xF0, 0),
+                       (0,    0xF0, 0),
+                       (0,    0xF0, 0x50), 
+                       (0,    0xF0, 0xA0),
+                       (0,    0xA0, 0xF0),
+                       (0,    0x50, 0xF0),
+                       (0,    0,    0xF0),
+                       #(0,    0,    0xA0),
+                       #(0,    0,    0x50),
+                       (0, 0, 0)]
+            for i in range(IMAGE_REP):
+                image.putpixel((IMAGE_REP*px+i, py), palette[m])
 
     ## Save the image
     image.save("mandelbrot_py.png")

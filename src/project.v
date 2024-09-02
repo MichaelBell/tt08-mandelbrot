@@ -17,37 +17,48 @@ module tt_um_MichaelBell_mandelbrot (
 );
 
   // List all unused inputs to prevent warnings
-  wire _unused = &{ena, 1'b0};
+  wire _unused = &{ena, ui_in, uio_in, 1'b0};
 
   // All output pins must be assigned. If not used, assign to 0.
   assign uio_out = 0;
   assign uio_oe  = 0;
 
   // Handle input
-  wire [1:-12] value_in = {uio_in[5:0], ui_in};
-  wire input_x   = uio_in[6];
-  wire in_enable = uio_in[7];
+  //wire [1:-12] value_in = {uio_in[5:0], ui_in};
+  //wire input_x   = uio_in[6];
+  //wire in_enable = uio_in[7];
 
   localparam BITS = 16;
 
+  localparam x_left = -11 << (BITS-5);
+  localparam y_top = 13 << (BITS-6);
+  localparam x_inc = 270;
+  localparam y_inc = 51;
+
+  localparam max_step = 27;
+
+  //reg signed [2:-(BITS-3)] x_left;
+  //reg signed [2:-(BITS-3)] y_top;
   reg signed [2:-(BITS-3)] x0;
   reg signed [2:-(BITS-3)] y0;
   reg signed [2:-(BITS-3)] x;
   reg signed [2:-(BITS-3)] y;
-  reg [6:0] iter;
+  reg [3:0] iter;
+  reg [3:0] last_iter;
+  
+  wire signed [2:-(BITS-3)] next_x0;
+  wire signed [2:-(BITS-3)] next_y0;
+  wire [3:0] next_iter;
 
   wire signed [2:-(BITS-3)] x_out;
   wire signed [2:-(BITS-3)] y_out;
   wire escape;
-  reg escape_r;
 
-  assign uo_out = {escape_r, iter};
-
-  reg phase;
+  reg [4:0] step;
 
   mandel_iter #(.BITS(BITS)) i_mandel (
     .clk(clk),
-    .phase(phase),
+    .phase(step[0]),
     .x0(x0),
     .y0(y0),
     .x_in(x),
@@ -57,30 +68,93 @@ module tt_um_MichaelBell_mandelbrot (
     .escape(escape)
   );
 
+    wire next_frame;
+    wire next_row;
+    wire vga_blank;
+
+  vga i_vga (
+    .clk        (clk),
+    .reset_n    (rst_n),
+    .advance    (step[1:0] == 2'b11),
+    .hsync      (uo_out[7]),
+    .vsync      (uo_out[3]),
+    .blank      (vga_blank),
+    .hsync_pulse(next_row),
+    .vsync_pulse(next_frame)
+  );
+
+  assign next_iter = iter + (escape ? 0 : 1);
+  assign next_x0 = x0 + x_inc;
+  assign next_y0 = y0 - y_inc;
+
+  always @(posedge clk) begin
+    if (!rst_n) step <= 0;
+    else begin
+      step <= step + 1;
+      if (step == max_step) step <= 0;
+    end
+  end
+
   always @(posedge clk) begin
     if (!rst_n) begin
-      iter <= 0;
-    end else if (in_enable) begin
-      if (input_x) begin
-        x0 <= {value_in[1], value_in, {BITS-15{1'b0}}};
-        x  <= {value_in[1], value_in, {BITS-15{1'b0}}};
-      end else begin
-        y0 <= {value_in[1], value_in, {BITS-15{1'b0}}};
-        y  <= {value_in[1], value_in, {BITS-15{1'b0}}};
-      end
-      iter <= 0;
-      phase <= 0;
-      escape_r <= 0;
+      //x_left <= (-2 << (BITS-3));  // -2.0
+      //y_top <= (3 << (BITS-4));   // 1.5
+    end else if (next_row) begin
+      x0 <= x_left;
     end else begin
-      phase <= !phase;
-      if (phase) begin
-        if (!escape && iter != 7'h7f) begin
-          iter <= iter + 1;
+      if (step[0]) begin
+        iter <= next_iter[3:0];
+        if (step[4:1] == max_step[4:1]) begin
+          last_iter <= next_iter;
+          iter <= 0;
+          x0 <= next_x0;
+          x <= next_x0;
+          y <= y0;
+        end else if (!escape) begin
           x <= x_out;
           y <= y_out;
         end
-        escape_r <= escape;
       end
     end
   end
+
+  always @(posedge clk) begin
+    if (next_frame) begin
+      y0 <= y_top;
+    end else if (next_row) begin
+      y0 <= next_y0;
+    end
+  end
+
+    function [5:0] rainbow(input [3:0] idx);
+        case (idx)
+ 0: rainbow = 6'h23;
+ 1: rainbow = 6'h32;
+ 2: rainbow = 6'h31;
+ 3: rainbow = 6'h30;
+ 4: rainbow = 6'h34;
+ 5: rainbow = 6'h38;
+ 6: rainbow = 6'h2c;
+ 7: rainbow = 6'h1c;
+ 8: rainbow = 6'h0c;
+ 9: rainbow = 6'h0d;
+10: rainbow = 6'h0e;
+11: rainbow = 6'h0b;
+12: rainbow = 6'h07;
+13: rainbow = 6'h03;
+14: rainbow = 6'h00;
+15: rainbow = 6'hx;
+        endcase
+    endfunction  
+
+  wire [5:0] video_colour;
+  assign video_colour = rainbow(last_iter);
+
+  assign uo_out[0] = vga_blank ? 1'b0 : video_colour[5];
+  assign uo_out[1] = vga_blank ? 1'b0 : video_colour[3];
+  assign uo_out[2] = vga_blank ? 1'b0 : video_colour[1];
+  assign uo_out[4] = vga_blank ? 1'b0 : video_colour[4];
+  assign uo_out[5] = vga_blank ? 1'b0 : video_colour[2];
+  assign uo_out[6] = vga_blank ? 1'b0 : video_colour[0];  
+
 endmodule
