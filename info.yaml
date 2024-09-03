@@ -3,7 +3,7 @@ project:
   title:        "Mandelbrot"      # Project title
   author:       "Mike Bell"      # Your name
   discord:      "rebelmike"      # Your discord username, for communication and automatically assigning you a Tapeout role (optional)
-  description:  "Mandelbrot on VGA"      # One line description of what your project does
+  description:  "Mandelbrot on VGA, racing the beam"      # One line description of what your project does
   language:     "Verilog" # other examples include SystemVerilog, Amaranth, VHDL, etc
   clock_hz:     100000000       # Clock frequency in Hz (or 0 if not applicable)
 
@@ -38,14 +38,14 @@ pinout:
   ui[7]: "Input -5"
 
   # Outputs
-  uo[0]: "Iter 0"
-  uo[1]: "Iter 1"
-  uo[2]: "Iter 2"
-  uo[3]: "Iter 3"
-  uo[4]: "Iter 4"
-  uo[5]: "Iter 5"
-  uo[6]: "Iter 6"
-  uo[7]: "Escape"
+  uo[0]: "R[1]"
+  uo[1]: "G[1]"
+  uo[2]: "B[1]"
+  uo[3]: "vsync"
+  uo[4]: "R[0]"
+  uo[5]: "G[0]"
+  uo[6]: "B[0]"
+  uo[7]: "hsync"
 
   # Bidirectional pins
   uio[0]: "Input -4"

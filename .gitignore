@@ -3,7 +3,6 @@
 .vscode
 *.vcd
 runs
-tt_submission
 src/user_config.json
 src/config_merged.json
 test/sim_build
@@ -12,3 +11,9 @@ test/results.xml
 test/gate_level_netlist.v
 test/*.png
 verify/sby
+*.swp
+*.asc
+*.bin
+*.log
+*.uf2
+gds_render_preview*

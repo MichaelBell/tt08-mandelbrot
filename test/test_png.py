@@ -11,7 +11,7 @@ from mandelbrot import mandelbrot_calc
 from PIL import Image
 
 
-IMAGE_WIDTH = 91
+IMAGE_WIDTH = 103
 IMAGE_REP = 7
 IMAGE_HEIGHT = 480
 

@@ -13,10 +13,33 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Build GDS
-        uses: TinyTapeout/tt-gds-action@tt08
+      - name: Create commit_id.json
+        shell: bash
+        run: |
+          jq -n \
+            --arg app "Customised TT08 OL2 2.1.1" \
+            --arg repo "${{ github.server_url }}/${{ github.repository }}" \
+            --arg commit "${{ github.sha }}" \
+            --arg workflow_url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+            '{app: $app, repo: $repo, commit: $commit, workflow_url: $workflow_url}' \
+            > tt_submission/commit_id.json
+
+      - name: Publish tt_submission artifact
+        uses: actions/upload-artifact@v4
         with:
-          flow: openlane2
+          name: tt_submission
+          path: |
+            src/*
+            docs/*
+            tt_submission/*
+            info.yaml
+            LICENSE
+
+      - name: Upload gds_render (png) artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: gds_render
+          path: 'gds_render.png'
 
   precheck:
     needs: gds
@@ -35,7 +58,7 @@ jobs:
           submodules: recursive
 
       - name: GL test
-        uses: TinyTapeout/tt-gds-action/gl_test@tt08
+        uses: MichaelBell/tt-gds-action/gl_test@tt08
 
   viewer:
     needs: gds

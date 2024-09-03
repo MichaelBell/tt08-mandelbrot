@@ -32,7 +32,7 @@ module tt_um_MichaelBell_mandelbrot (
 
   localparam x_left = -11 << (BITS-5);
   localparam y_top = 13 << (BITS-6);
-  localparam x_inc = 270;
+  localparam x_inc = 240;
   localparam y_inc = 51;
 
   localparam max_step = 27;

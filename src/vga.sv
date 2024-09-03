@@ -4,19 +4,19 @@
 `default_nettype none
 
     /*
-        Default parameters are VGA 640x480 @ 60 Hz
-        clock = ~25 MHz
+        Parameters are CVT 720x480 @ 56 Hz
+        Clock at 25 MHz
     */
 
 module vga #(
-    parameter WIDTH=640,    // display width
+    parameter WIDTH=720,    // display width
     parameter HEIGHT=480,   // display height
-    parameter HFRONT=16,    // horizontal front porch
-    parameter HSYNC=96,     // horizontal sync
-    parameter HBACK=46,     // horizontal back porch
-    parameter VFRONT=10,    // vertical front porch
-    parameter VSYNC=2,      // vertical sync
-    parameter VBACK=33      // vertical back porch
+    parameter HFRONT=24,    // horizontal front porch
+    parameter HSYNC=64,     // horizontal sync
+    parameter HBACK=88,     // horizontal back porch
+    parameter VFRONT=3,    // vertical front porch
+    parameter VSYNC=10,      // vertical sync
+    parameter VBACK=6      // vertical back porch
 )(
     input  logic clk,       // clock
     input  logic reset_n,   // reset
@@ -67,7 +67,7 @@ module vga #(
         .SYNC_PULSE     (VSYNC),
         .BACK_PORCH     (VBACK),
         .TOTAL          (VTOTAL),
-        .POLARITY       (1'b0)
+        .POLARITY       (1'b1)
     ) timing_ver (
         .clk        (clk),
         .enable     (next_row),
