@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: © 2024 Uri Shaked
+# SPDX-FileCopyrightText: © 2024 Uri Shaked, Michael Bell
 # SPDX-License-Identifier: Apache-2.0
 
 # Plots the Mandelbrot set using the cocotb test framework

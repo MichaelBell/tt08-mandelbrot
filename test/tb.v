@@ -5,16 +5,15 @@
 */
 module tb ();
 
-  reg signed [1:-12] value_in;
-  reg input_x;
-  reg input_en;
+  reg signed [12:0] value_in;
+  reg [2:0] ctrl_in;
 
   // Wire up the inputs and outputs:
   reg clk;
   reg rst_n;
   reg ena;
-  wire [7:0] ui_in = value_in[-5:-12];
-  wire [7:0] uio_in = {input_en, input_x, value_in[1:-4]};
+  wire [7:0] ui_in = {value_in[4:0], ctrl_in};
+  wire [7:0] uio_in = {value_in[12:5]};
   wire [7:0] uo_out;
   wire [7:0] uio_out;
   wire [7:0] uio_oe;

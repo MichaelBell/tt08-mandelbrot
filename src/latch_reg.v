@@ -37,7 +37,15 @@ module latch_reg #(
     // Lint for sky130 cells expects power pins, so disable the warning
     /* verilator lint_off PINMISSING */
     sky130_fd_sc_hd__inv_1 CLKINV(.Y(clk_b), .A(clk));
-    sky130_fd_sc_hd__dlclkp_4 CG( .CLK(clk_b), .GCLK(gated_clk), .GATE(wen) );
+
+    generate
+        if (WIDTH <= 6)
+            sky130_fd_sc_hd__dlclkp_1 CG( .CLK(clk_b), .GCLK(gated_clk), .GATE(wen) );
+        else if (WIDTH <= 12)
+            sky130_fd_sc_hd__dlclkp_2 CG( .CLK(clk_b), .GCLK(gated_clk), .GATE(wen) );
+        else
+            sky130_fd_sc_hd__dlclkp_4 CG( .CLK(clk_b), .GCLK(gated_clk), .GATE(wen) );
+    endgenerate
 
     genvar i;
     generate

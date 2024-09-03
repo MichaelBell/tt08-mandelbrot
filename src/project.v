@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Your Name
+ * Copyright (c) 2024 Michael Bell
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -23,31 +23,37 @@ module tt_um_MichaelBell_mandelbrot (
   assign uio_out = 0;
   assign uio_oe  = 0;
 
-  // Handle input
-  //wire [1:-12] value_in = {uio_in[5:0], ui_in};
-  //wire input_x   = uio_in[6];
-  //wire in_enable = uio_in[7];
-
   localparam BITS = 16;
-
-  localparam x_left = -11 << (BITS-5);
-  localparam y_top = 13 << (BITS-6);
-  localparam x_inc = 240;
-  localparam y_inc = 51;
 
   localparam max_step = 27;
 
-  //reg signed [2:-(BITS-3)] x_left;
-  //reg signed [2:-(BITS-3)] y_top;
   reg signed [2:-(BITS-3)] x0;
   reg signed [2:-(BITS-3)] y0;
+  wire signed [2:-(BITS-3)] next_x0;
+  wire signed [2:-(BITS-3)] next_y0;
+
+  wire next_pixel;
+  wire next_frame;
+  wire next_row;
+
+  coord_control #(.BITS(BITS)) i_coord(
+    .clk(clk),
+    .rst_n(rst_n),
+    .next_row(next_row),
+    .next_frame(next_frame),
+    .value({uio_in, ui_in[7:3]}),
+    .ctrl(ui_in[2:0]),
+    .x0(x0),
+    .y0(y0),
+    .next_x0(next_x0),
+    .next_y0(next_y0)
+  );
+
   reg signed [2:-(BITS-3)] x;
   reg signed [2:-(BITS-3)] y;
   reg [3:0] iter;
   reg [3:0] last_iter;
   
-  wire signed [2:-(BITS-3)] next_x0;
-  wire signed [2:-(BITS-3)] next_y0;
   wire [3:0] next_iter;
 
   wire signed [2:-(BITS-3)] x_out;
@@ -68,14 +74,14 @@ module tt_um_MichaelBell_mandelbrot (
     .escape(escape)
   );
 
-    wire next_frame;
-    wire next_row;
-    wire vga_blank;
+  wire vga_blank;
+
+  assign next_pixel = step[1:0] == 2'b11;
 
   vga i_vga (
     .clk        (clk),
     .reset_n    (rst_n),
-    .advance    (step[1:0] == 2'b11),
+    .advance    (next_pixel),
     .hsync      (uo_out[7]),
     .vsync      (uo_out[3]),
     .blank      (vga_blank),
@@ -84,8 +90,6 @@ module tt_um_MichaelBell_mandelbrot (
   );
 
   assign next_iter = iter + (escape ? 0 : 1);
-  assign next_x0 = x0 + x_inc;
-  assign next_y0 = y0 - y_inc;
 
   always @(posedge clk) begin
     if (!rst_n) step <= 0;
@@ -96,11 +100,9 @@ module tt_um_MichaelBell_mandelbrot (
   end
 
   always @(posedge clk) begin
-    if (!rst_n) begin
-      //x_left <= (-2 << (BITS-3));  // -2.0
-      //y_top <= (3 << (BITS-4));   // 1.5
-    end else if (next_row) begin
-      x0 <= x_left;
+    if (next_row || next_frame) begin
+      x0 <= next_x0;
+      y0 <= next_y0;
     end else begin
       if (step[0]) begin
         iter <= next_iter[3:0];
@@ -108,21 +110,14 @@ module tt_um_MichaelBell_mandelbrot (
           last_iter <= next_iter;
           iter <= 0;
           x0 <= next_x0;
+          y0 <= next_y0;
           x <= next_x0;
-          y <= y0;
+          y <= next_y0;
         end else if (!escape) begin
           x <= x_out;
           y <= y_out;
         end
       end
-    end
-  end
-
-  always @(posedge clk) begin
-    if (next_frame) begin
-      y0 <= y_top;
-    end else if (next_row) begin
-      y0 <= next_y0;
     end
   end
 

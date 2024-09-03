@@ -6,7 +6,7 @@ SIM ?= icarus
 WAVES ?= 1
 TOPLEVEL_LANG ?= verilog
 SRC_DIR = $(PWD)/../src
-PROJECT_SOURCES = project.v mandel.v square.v multiply.v latch_reg.v vga.sv timing.sv
+PROJECT_SOURCES = project.v mandel.v square.v multiply.v latch_reg.v vga.sv timing.sv coord.v
 
 ifneq ($(GATES),yes)
 
