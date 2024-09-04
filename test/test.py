@@ -106,11 +106,11 @@ async def test_vertical(dut):
     await do_start(dut)
 
     dut.ctrl_in.value = CTRL_SET_LEFT
-    dut.value_in.value = -9 << 8
+    dut.value_in.value = -2 << 10
     await ClockCycles(dut.clk, 1)
 
     dut.ctrl_in.value = CTRL_SET_TOP
-    dut.value_in.value = 2 << 10
+    dut.value_in.value = 3 << 9
     await ClockCycles(dut.clk, 1)
 
     dut.ctrl_in.value = CTRL_SET_INC_COL_X

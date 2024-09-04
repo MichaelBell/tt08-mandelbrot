@@ -28,9 +28,11 @@ module tt_um_MichaelBell_mandelbrot (
   localparam max_step = 27;
 
   reg signed [2:-(BITS-3)] x0;
-  reg signed [2:-(BITS-3)] y0;
+  reg signed [1:-(BITS-3)] y0;
   wire signed [2:-(BITS-3)] next_x0;
-  wire signed [2:-(BITS-3)] next_y0;
+  wire signed [1:-(BITS-3)] next_y0;
+  wire signed [2:-(BITS-3)] next_x0_with_blank;
+  wire signed [1:-(BITS-3)] next_y0_with_blank;
 
   wire next_pixel;
   wire next_frame;
@@ -66,7 +68,7 @@ module tt_um_MichaelBell_mandelbrot (
     .clk(clk),
     .phase(step[0]),
     .x0(x0),
-    .y0(y0),
+    .y0({y0[1], y0}),
     .x_in(x),
     .y_in(y),
     .x_out(x_out),
@@ -99,20 +101,23 @@ module tt_um_MichaelBell_mandelbrot (
     end
   end
 
+  assign next_x0_with_blank = vga_blank ? x0 : next_x0;
+  assign next_y0_with_blank = vga_blank ? y0 : next_y0;
+
   always @(posedge clk) begin
     if (next_row || next_frame) begin
       x0 <= next_x0;
       y0 <= next_y0;
     end else begin
       if (step[0]) begin
-        iter <= next_iter[3:0];
+        iter <= next_iter;
         if (step[4:1] == max_step[4:1]) begin
           last_iter <= next_iter;
           iter <= 0;
-          x0 <= next_x0;
-          y0 <= next_y0;
-          x <= next_x0;
-          y <= next_y0;
+          x0 <= next_x0_with_blank;
+          y0 <= next_y0_with_blank;
+          x <= next_x0_with_blank;
+          y <= {next_y0_with_blank[1], next_y0_with_blank};
         end else if (!escape) begin
           x <= x_out;
           y <= y_out;

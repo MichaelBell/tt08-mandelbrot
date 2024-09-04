@@ -1,6 +1,6 @@
 # Tiny Tapeout project information
 project:
-  title:        "Mandelbrot"      # Project title
+  title:        "VGA Mandelbrot" # Project title
   author:       "Mike Bell"      # Your name
   discord:      "rebelmike"      # Your discord username, for communication and automatically assigning you a Tapeout role (optional)
   description:  "Mandelbrot on VGA, racing the beam"      # One line description of what your project does
@@ -29,14 +29,14 @@ project:
 # The pinout of your project. Leave unused pins blank. DO NOT delete or add any pins.
 pinout:
   # Inputs
-  ui[0]: "Input -12"
-  ui[1]: "Input -11"
-  ui[2]: "Input -10"
-  ui[3]: "Input -9"
-  ui[4]: "Input -8"
-  ui[5]: "Input -7"
-  ui[6]: "Input -6"
-  ui[7]: "Input -5"
+  ui[0]: "Ctrl 0"
+  ui[1]: "Ctrl 1"
+  ui[2]: "Ctrl 2"
+  ui[3]: "Input 0"
+  ui[4]: "Input 1"
+  ui[5]: "Input 2"
+  ui[6]: "Input 3"
+  ui[7]: "Input 4"
 
   # Outputs
   uo[0]: "R[1]"
@@ -49,14 +49,14 @@ pinout:
   uo[7]: "hsync"
 
   # Bidirectional pins
-  uio[0]: "Input -4"
-  uio[1]: "Input -3"
-  uio[2]: "Input -2"
-  uio[3]: "Input -1"
-  uio[4]: "Input 0"
-  uio[5]: "Input 1"
-  uio[6]: "Input X"
-  uio[7]: "Input EN"
+  uio[0]: "Input 5"
+  uio[1]: "Input 6"
+  uio[2]: "Input 7"
+  uio[3]: "Input 8"
+  uio[4]: "Input 9"
+  uio[5]: "Input 10"
+  uio[6]: "Input 11"
+  uio[7]: "Input 12"
 
 # Do not change!
 yaml_version: 6
