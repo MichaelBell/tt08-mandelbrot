@@ -35,16 +35,19 @@ module coord_control #(parameter BITS=16) (
   wire signed [-4:-(BITS-3)] x_inc_px;
   wire signed [-4:-(BITS-3)] y_inc_px;
   wire signed [-6:-(BITS-3)] x_inc_row;
-  wire signed [-6:-(BITS-3)] y_inc_row;
+  reg signed [-6:-(BITS-3)] y_inc_row;
 
   reg signed [2:-(BITS-3)] x_row_start;
   reg signed [1:-(BITS-3)] y_row_start;
 
-  wire demo_update;
-  assign demo_update = ctrl == `CTRL_DEMO && next_frame;
+  reg demo_update;
+  always @(posedge clk) begin
+    if (!rst_n) demo_update <= 0;
+    else demo_update <= ctrl == `CTRL_DEMO && next_frame;
+  end
 
-  wire [1:-(BITS-3)] demo_y_top = y_top_default - 240;
-  wire [-6:-(BITS-3)] demo_y_in = y_inc_default + 1;
+  wire [1:-(BITS-3)] demo_y_top = y0 - 240;
+  wire [-6:-(BITS-3)] demo_y_inc = y_inc_row + 1;
 
   latch_reg #(.WIDTH(BITS)) l_xl (
     .clk(clk),
@@ -81,12 +84,13 @@ module coord_control #(parameter BITS=16) (
     .data_out(x_inc_row)
   );
 
-  latch_reg #(.WIDTH(8)) l_yir (
-    .clk(clk),
-    .wen(!rst_n || ctrl == `CTRL_SET_INC_ROW_Y),
-    .data_in(rst_n ? (demo_update ? demo_y_in : value[7:0]) : y_inc_default),
-    .data_out(y_inc_row)
-  );
+  always @(posedge clk) begin
+    if (!rst_n) y_inc_row <= y_inc_default;
+    else begin
+      if (demo_update) y_inc_row <= demo_y_inc;
+      else if (ctrl == `CTRL_SET_INC_ROW_Y) y_inc_row <= value[7:0];
+    end
+  end
 
   assign next_x0 = next_frame ? x_left :
                    next_row   ? x_row_start :

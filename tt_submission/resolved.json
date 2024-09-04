@@ -285,7 +285,7 @@
         0,
         0
     ],
-    "PL_TARGET_DENSITY_PCT": 96,
+    "PL_TARGET_DENSITY_PCT": 98,
     "PL_SKIP_INITIAL_PLACEMENT": false,
     "PL_WIRE_LENGTH_COEF": 0.25,
     "PL_MIN_PHI_COEFFICIENT": null,
