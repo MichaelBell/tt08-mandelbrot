@@ -43,5 +43,6 @@ jobs:
         with:
           name: test-vcd
           path: |
-            test/tb.vcd
+            test/sim_build/rtl/tb.fst
             test/results.xml
+            test/frame*.png
