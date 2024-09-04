@@ -23,7 +23,24 @@ The output image is at a 720x480 resolution (~103x480 Mandelbrot pixels).
 
 Provide a 100MHz clock.
 
-The image position and zoom may be able to be configured (TBD)
+The image position and zoom can be configured using the input and bidir pins.
+
+in[2:0] control the configuration to set, and {io[7:0], in[7:3]} specify a signed value when setting a register.
+
+These values should only be updated during vsync.
+
+| Ctrl | Value |
+| ---- | ----- |
+| 0    | Enable demo mode (TBD) |
+| 1    | Set X coordinate for top-left of screen to value / 2^10 |
+| 2    | Set Y coordinate for top-left of screen to value / 2^11 |
+| 3    | No action |
+| 4    | Set X increment per column to value[9:0] / 2^13 | 
+| 5    | Set Y increment per column to value[9:0] / 2^13 |
+| 6    | Set X increment per row to value[7:0] / 2^13 | 
+| 7    | Set Y increment per row to value[7:0] / 2^13 |
+
+Note there are 103 columns and 480 rows displayed.
 
 ## External hardware
 
