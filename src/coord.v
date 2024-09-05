@@ -46,8 +46,9 @@ module coord_control #(parameter BITS=16) (
     else demo_update <= ctrl == `CTRL_DEMO && next_frame;
   end
 
-  wire [1:-(BITS-3)] demo_y_top = y0 - 240;
-  wire [-6:-(BITS-3)] demo_y_inc = y_inc_row + 1;
+  wire signed [1:-(BITS-3)] demo_y_top = y0 - 240;
+  wire signed [-6:-(BITS-3)] demo_y_inc = y_inc_row + 1;
+  wire signed [-4:-(BITS-3)] demo_x_inc = demo_y_inc[-6] ? {~demo_y_inc, 2'b00} : {demo_y_inc, 2'b00};
 
   latch_reg #(.WIDTH(BITS)) l_xl (
     .clk(clk),
@@ -65,8 +66,8 @@ module coord_control #(parameter BITS=16) (
 
   latch_reg #(.WIDTH(10)) l_xip (
     .clk(clk),
-    .wen(!rst_n || ctrl == `CTRL_SET_INC_COL_X),
-    .data_in(rst_n ? value[9:0] : x_inc_default),
+    .wen(!rst_n || ctrl == `CTRL_SET_INC_COL_X || demo_update),
+    .data_in(rst_n ? (demo_update ? demo_x_inc : value[9:0]) : x_inc_default),
     .data_out(x_inc_px)
   );
 
