@@ -40,14 +40,16 @@ module coord_control #(parameter BITS=16) (
   reg signed [2:-(BITS-3)] x_row_start;
   reg signed [1:-(BITS-3)] y_row_start;
 
-  reg demo_update;
+  reg [1:0] demo_update_r;
   always @(posedge clk) begin
-    if (!rst_n) demo_update <= 0;
-    else demo_update <= ctrl == `CTRL_DEMO && next_frame;
+    if (!rst_n) demo_update_r <= 2'b00;
+    else demo_update_r <= {demo_update_r[0], demo_update_r == 2'b00 && ctrl == `CTRL_DEMO && next_frame};
   end
+  wire demo_update = demo_update_r[0];
 
-  wire signed [1:-(BITS-3)] demo_y_top = y0 - 240;
-  wire signed [-6:-(BITS-3)] demo_y_inc = y_inc_row + 1;
+  wire demo_reset = y_inc_row == 51;
+  wire signed [1:-(BITS-3)] demo_y_top = demo_reset ? y_top_default : y0 - 240;
+  wire signed [-6:-(BITS-3)] demo_y_inc = demo_reset ? y_inc_default : y_inc_row + 1;
   wire signed [-4:-(BITS-3)] demo_x_inc = demo_y_inc[-6] ? {~demo_y_inc, 2'b00} : {demo_y_inc, 2'b00};
 
   latch_reg #(.WIDTH(BITS)) l_xl (
