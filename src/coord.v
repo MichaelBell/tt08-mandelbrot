@@ -40,12 +40,18 @@ module coord_control #(parameter BITS=16) (
   reg signed [2:-(BITS-3)] x_row_start;
   reg signed [1:-(BITS-3)] y_row_start;
 
-  reg [1:0] demo_update_r;
+  reg demo_update_delay;
+  wire demo_update_en = ctrl == `CTRL_DEMO && !demo_update_delay;
   always @(posedge clk) begin
-    if (!rst_n) demo_update_r <= 2'b00;
-    else demo_update_r <= {demo_update_r[0], demo_update_r == 2'b00 && ctrl == `CTRL_DEMO && next_frame};
+    if (!rst_n) demo_update_delay <= 0;
+    else if (next_frame) demo_update_delay <= !demo_update_delay;
   end
-  wire demo_update = demo_update_r[0];
+
+  reg demo_update;
+  always @(posedge clk) begin
+    if (!rst_n) demo_update <= 0;
+    else demo_update <= demo_update_en && next_frame;
+  end
 
   wire demo_reset = y_inc_row == 51;
   wire signed [1:-(BITS-3)] demo_y_top = demo_reset ? y_top_default : y0 - 240;
@@ -105,9 +111,15 @@ module coord_control #(parameter BITS=16) (
   always @(posedge clk) begin
     if (next_frame) begin
       x_row_start <= x_left;
-      y_row_start <= y_top;
     end else if (next_row) begin
       x_row_start <= x_row_start + {{8{x_inc_row[-6]}}, x_inc_row};
+    end
+  end
+
+  always @(posedge clk) begin
+    if (next_frame || demo_update) begin
+      y_row_start <= y_top;
+    end else if (next_row) begin
       y_row_start <= y_row_start + {{7{y_inc_row[-6]}}, y_inc_row};
     end
   end
